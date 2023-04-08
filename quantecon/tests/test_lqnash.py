@@ -3,9 +3,11 @@ Tests for lqnash.py
 
 """
 import numpy as np
+import pytest
 from numpy.testing import assert_allclose
 from quantecon import nnash
 from quantecon import LQ
+from quantecon.util.random import check_random_state
 
 
 class TestLQNash:
@@ -108,3 +110,15 @@ class TestLQNash:
         assert_allclose(f1, f1_ml)
         assert_allclose(f2, f2_ml)
         assert_allclose(xbar, xbar_ml)
+
+    def test_check_random_state(self):
+        none_seed = check_random_state(None)
+        assert none_seed == np.random.mtrand._rand
+        int_seed = check_random_state(5)
+        assert isinstance(int_seed, np.random.RandomState)
+        assert int_seed.random() == 0.22199317108973948
+        rand_state_seed = check_random_state(int_seed)
+        assert rand_state_seed == int_seed
+
+        with pytest.raises(ValueError):
+            check_random_state("Bad data test")
