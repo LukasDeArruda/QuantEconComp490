@@ -130,5 +130,17 @@ class TestLQNash:
         assert int_seed3.randint(100, 204) == 137
         assert int_seed4.randint(30, 50) == 38
 
+        # Test with a negative integer seed (Which raises ValueError)
+        with pytest.raises(ValueError) as parameter_error:
+            neg_seed = check_random_state(-1)
+            isinstance(neg_seed, np.random.RandomState)
+        assert parameter_error.type is ValueError
+
+        # Test with a float seed
+        with pytest.raises(ValueError) as parameter_error:
+            float_seed = check_random_state(0.5)
+            isinstance(float_seed, np.random.RandomState)
+        assert parameter_error.type is ValueError
+
         with pytest.raises(ValueError):
             check_random_state("Bad data test")
