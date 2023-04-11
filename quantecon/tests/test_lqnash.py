@@ -142,5 +142,6 @@ class TestLQNash:
             isinstance(float_seed, np.random.RandomState)
         assert parameter_error.type is ValueError
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as error:
             check_random_state("Bad data test")
+        assert error.type is ValueError
