@@ -189,9 +189,9 @@ class LinearStateSpace:
 
         if self.H is not None:
             v = random_state.standard_normal((self.l, ts_length))
-            y = self.G.dot(x) + self.H.dot(v)
+            y = self.G @ x + self.H @ v
         else:
-            y = self.G.dot(x)
+            y = self.G @ x
 
         return x, y
 
@@ -231,9 +231,9 @@ class LinearStateSpace:
             x[:, j] = x_T[:, -1]
         if self.H is not None:
             v = random_state.standard_normal((self.l, num_reps))
-            y = self.G.dot(x) + self.H.dot(v)
+            y = self.G @ x + self.H @ v
         else:
-            y = self.G.dot(x)
+            y = self.G @ x
 
         return x, y
 
@@ -267,15 +267,15 @@ class LinearStateSpace:
         while 1:
             mu_y = G.dot(mu_x)
             if H is None:
-                Sigma_y = G.dot(Sigma_x).dot(G.T)
+                Sigma_y = G @ Sigma_x @ G.T
             else:
-                Sigma_y = G.dot(Sigma_x).dot(G.T) + H.dot(H.T)
+                Sigma_y = G @ Sigma_x @ G.T + H @ H.T
 
             yield mu_x, mu_y, Sigma_x, Sigma_y
 
             # == Update moments of x == #
-            mu_x = A.dot(mu_x)
-            Sigma_x = A.dot(Sigma_x).dot(A.T) + C.dot(C.T)
+            mu_x = A @ mu_x
+            Sigma_x = A @ Sigma_x @ A.T + C @ C.T
 
     def stationary_distributions(self):
         r"""
@@ -363,7 +363,7 @@ class LinearStateSpace:
 
         I = np.identity(self.n)
         S_x = solve(I - beta * self.A, x_t)
-        S_y = self.G.dot(S_x)
+        S_y = self.G @ S_x
 
         return S_x, S_y
 
@@ -396,12 +396,12 @@ class LinearStateSpace:
 
         # Create room for coefficients
         xcoef = [C]
-        ycoef = [np.dot(G, C)]
+        ycoef = [G @ C]
 
         for i in range(j):
-            xcoef.append(np.dot(Apower, C))
-            ycoef.append(np.dot(G, np.dot(Apower, C)))
-            Apower = np.dot(Apower, A)
+            xcoef.append(Apower @ C)
+            ycoef.append(G @ Apower @ C)
+            Apower = Apower @ A
 
         return xcoef, ycoef
 
