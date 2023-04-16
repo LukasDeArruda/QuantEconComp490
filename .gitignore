@@ -18,3 +18,5 @@ quantecon.egg-info/
 # Coverage
 
 coverage.xml
+
+.idea/
