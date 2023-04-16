@@ -146,14 +146,14 @@ class DLE(object):
         # === Construct matrices for Lagrange Multipliers === #
 
         self.Mk = -2 * self.beta.item() * (np.hstack((np.zeros((self.nk, self.nh)), np.eye(
-            self.nk), np.zeros((self.nk, self.nz))))).dot(self.P).dot(self.A0)
+            self.nk), np.zeros((self.nk, self.nz)))))@(self.P)@(self.A0)
         self.Mh = -2 * self.beta.item() * (np.hstack((np.eye(self.nh), np.zeros(
-            (self.nh, self.nk)), np.zeros((self.nh, self.nz))))).dot(self.P).dot(self.A0)
+            (self.nh, self.nk)), np.zeros((self.nh, self.nz)))))@(self.P)@(self.A0)
         self.Ms = -(self.Sb - self.Ss)
-        self.Md = -(np.linalg.inv(np.vstack((self.phic.T, self.phig.T))).dot(
-            np.vstack((self.thetah.T.dot(self.Mh) + self.pih.T.dot(self.Ms), -self.Sg))))
-        self.Mc = -(self.thetah.T.dot(self.Mh) + self.pih.T.dot(self.Ms))
-        self.Mi = -(self.thetak.T.dot(self.Mk))
+        self.Md = -(np.linalg.inv(np.vstack((self.phic.T, self.phig.T)))@(
+            np.vstack((self.thetah.T@(self.Mh) + self.pih.T@(self.Ms), -self.Sg))))
+        self.Mc = -(self.thetah.T@(self.Mh) + self.pih.T@(self.Ms))
+        self.Mi = -(self.thetak.T@(self.Mk))
 
     def compute_steadystate(self, nnc=2):
         """

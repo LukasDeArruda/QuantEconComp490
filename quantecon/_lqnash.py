@@ -131,8 +131,8 @@ def nnash(A, B1, B2, R1, R2, Q1, Q2, S1, S2, W1, W2, M1, M2,
         F1 = solve(F1_left, F1_right)
         F2 = H2.dot(A)+G2.dot(W2.T) - np.dot(H2.dot(B1)+G2.dot(M2.T), F1)
 
-        Lambda1 = A - B2.dot(F2)
-        Lambda2 = A - B1.dot(F1)
+        Lambda1 = A - B2@(F2)
+        Lambda2 = A - B1@(F1)
         Pi1 = R1 + np.dot(F2.T, S1.dot(F2))
         Pi2 = R2 + np.dot(F1.T, S2.dot(F1))
 
