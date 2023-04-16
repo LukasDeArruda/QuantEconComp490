@@ -107,10 +107,10 @@ class RBLQ:
         """
         C, theta = self.C, self.theta
         I = np.identity(self.j)
-        S1 = np.dot(P, C)
-        S2 = np.dot(C.T, S1)
+        S1 = P @ C
+        S2 = C.T @ S1
 
-        dP = P + np.dot(S1, solve(theta * I - S2, S1.T))
+        dP = P + (S1 @ solve(theta * I - S2, S1.T))
 
         return dP
 
@@ -142,12 +142,12 @@ class RBLQ:
 
         """
         A, B, Q, R, beta = self.A, self.B, self.Q, self.R, self.beta
-        S1 = Q + beta * np.dot(B.T, np.dot(P, B))
-        S2 = beta * np.dot(B.T, np.dot(P, A))
-        S3 = beta * np.dot(A.T, np.dot(P, A))
+        S1 = Q + beta * (B.T @ (P @ B))
+        S2 = beta * (B.T @ (P @ A))
+        S3 = beta * (A.T @ (P @ A))
         F = solve(S1, S2) if not self.pure_forecasting else np.zeros(
             (self.k, self.n))
-        new_P = R - np.dot(S2.T, F) + S3
+        new_P = R - (S2.T @ F) + S3
 
         return F, new_P
 
@@ -191,7 +191,7 @@ class RBLQ:
         Z = np.zeros((k, j))
 
         if self.pure_forecasting:
-            lq = LQ(-beta*I*theta, R, A, C, beta=beta)
+            lq = LQ(-beta * I * theta, R, A, C, beta=beta)
 
             # == Solve and convert back to robust problem == #
             P, f, d = lq.stationary_values(method=method)
@@ -200,7 +200,7 @@ class RBLQ:
 
         else:
             Ba = np.hstack([B, C])
-            Qa = np.vstack([np.hstack([Q, Z]), np.hstack([Z.T, -beta*I*theta])])
+            Qa = np.vstack([np.hstack([Q, Z]), np.hstack([Z.T, -beta * I * theta])])
             lq = LQ(Qa, R, A, Ba, beta=beta)
 
             # == Solve and convert back to robust problem == #
@@ -249,13 +249,13 @@ class RBLQ:
         iterate, e = 0, tol + 1
         while iterate < max_iter and e > tol:
             F, new_P = self.b_operator(self.d_operator(P))
-            e = np.sqrt(np.sum((new_P - P)**2))
+            e = np.sqrt(np.sum((new_P - P) ** 2))
             iterate += 1
             P = new_P
         I = np.identity(self.j)
         S1 = P @ C
         S2 = C.T @ S1
-        K = inv(theta * I - S2) @ S1.T @(A - B @ (F))
+        K = inv(theta * I - S2) @ S1.T @ (A - B @ F)
 
         return F, K, P
 
@@ -280,8 +280,8 @@ class RBLQ:
 
         """
         Q2 = self.beta * self.theta
-        R2 = - self.R - np.dot(F.T, np.dot(self.Q, F))
-        A2 = self.A - np.dot(self.B, F)
+        R2 = - self.R - (F.T @ (self.Q @ F))
+        A2 = self.A - (self.B @ F)
         B2 = self.C
         lq = LQ(Q2, R2, A2, B2, beta=self.beta)
         neg_P, neg_K, d = lq.stationary_values(method=method)
@@ -387,7 +387,7 @@ class RBLQ:
         # == Solve for policies and costs using agent 2's problem == #
         K_F, P_F = self.F_to_K(F)
         I = np.identity(self.j)
-        H = inv(I - C.T@(P_F.dot(C)) / theta)
+        H = inv(I - C.T @ (P_F.dot(C)) / theta)
         d_F = np.log(det(H))
 
         # == Compute O_F and o_F == #

@@ -73,7 +73,7 @@ def solve_discrete_lyapunov(A, B, max_it=50, method="doubling"):
         while diff > 1e-15:
 
             alpha1 = alpha0 @ alpha0
-            gamma1 = gamma0 + np.dot(alpha0 @ gamma0, alpha0.conjugate().T)
+            gamma1 = gamma0 + (alpha0 @ gamma0 @ alpha0.conjugate().T)
 
             diff = np.max(np.abs(gamma1 - gamma0))
             alpha0 = alpha1
@@ -171,14 +171,14 @@ def solve_discrete_riccati(A, B, Q, R, N=None, tolerance=1e-10, max_iter=500,
     # == Choose optimal value of gamma in R_hat = R + gamma B'B == #
     current_min = np.inf
     candidates = (0.01, 0.1, 0.25, 0.5, 1.0, 2.0, 10.0, 100.0, 10e5)
-    BB = np.dot(B.T, B)
-    BTA = np.dot(B.T, A)
+    BB = B.T @ B
+    BTA = B.T @ A
     for gamma in candidates:
         Z = R + gamma * BB
         cn = np.linalg.cond(Z)
         if cn * EPS < 1:
-            Q_tilde = - Q + np.dot(N.T, solve(Z, N + gamma * BTA)) + gamma * I
-            G0 = np.dot(B, solve(Z, B.T))
+            Q_tilde = - Q + ((N.T @ solve(Z, N + gamma * BTA)) + gamma * I)
+            G0 = (B @ solve(Z, B.T))
             A0 = np.dot(I - gamma * G0, A) - np.dot(B, solve(Z, N))
             H0 = gamma * np.dot(A.T, A0) - Q_tilde
             f1 = np.linalg.cond(Z, np.inf)
