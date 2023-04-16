@@ -22,7 +22,8 @@ class TestKalman:
 
         ss = LinearStateSpace(self.A, self.C, self.G, self.H)
 
-        self.kf = Kalman(ss)
+        #self.kf = Kalman(ss)
+        self.kf = Kalman(A=self.A, C=self.C, G=self.G, H=self.H)
 
         self.methods = ['doubling', 'qz']
 

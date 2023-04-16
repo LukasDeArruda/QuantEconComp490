@@ -8,6 +8,8 @@ https://lectures.quantecon.org/py/kalman.html
 
 """
 from textwrap import dedent
+
+import numpy
 import numpy as np
 from scipy.linalg import inv
 from ._lss import LinearStateSpace
@@ -61,11 +63,21 @@ class Kalman:
 
     """
 
-    def __init__(self, ss, x_hat=None, Sigma=None):
-        self.ss = ss
+    def __init__(self, ss=None, A=None, C=None, G=None, H=None, mu_0=None, Sigma_0=None, x_hat=None, Sigma=None):
+        print(H)
+        if type(ss) is LinearStateSpace:
+            self.ss = ss
+        elif type(A) in [np.ndarray, list, np.array]:
+            self.ss = LinearStateSpace(A, C, G, H, mu_0, Sigma_0)
+            # print(A, C, G, H)
+            # print("ss is", ss)
+        else:
+            print("Invalid argument specified")
+            return
         self.set_state(x_hat, Sigma)
         self._K_infinity = None
         self._Sigma_infinity = None
+
 
     def set_state(self, x_hat, Sigma):
         if Sigma is None:
