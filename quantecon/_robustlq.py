@@ -308,10 +308,10 @@ class RBLQ:
             The value function for a given K
 
         """
-        A1 = self.A + np.dot(self.C, K)
+        A1 = self.A + (self.C @ K)
         B1 = self.B
         Q1 = self.Q
-        R1 = self.R - self.beta * self.theta * np.dot(K.T, K)
+        R1 = self.R - self.beta * self.theta * (K.T @ K)
         lq = LQ(Q1, R1, A1, B1, beta=self.beta)
         P, F, d = lq.stationary_values(method=method)
 
@@ -348,9 +348,9 @@ class RBLQ:
             The deterministic entropy
 
         """
-        H0 = np.dot(K.T, K)
+        H0 = K.T @ K
         C0 = np.zeros((self.n, 1))
-        A0 = self.A - np.dot(self.B, F) + np.dot(self.C, K)
+        A0 = self.A - (self.B @ F) + (self.C @ K)
         e = var_quadratic_sum(A0, C0, H0, self.beta, x0)
 
         return e
@@ -391,10 +391,10 @@ class RBLQ:
         d_F = np.log(det(H))
 
         # == Compute O_F and o_F == #
-        AO = np.sqrt(beta) * (A - np.dot(B, F) + np.dot(C, K_F))
-        O_F = solve_discrete_lyapunov(AO.T, beta * np.dot(K_F.T, K_F))
+        AO = np.sqrt(beta) * (A - (B @ F) + (C @ K_F))
+        O_F = solve_discrete_lyapunov(AO.T, beta * (K_F.T @ K_F))
         ho = (np.trace(H - 1) - d_F) / 2.0
-        tr = np.trace(np.dot(O_F, C.dot(H.dot(C.T))))
+        tr = np.trace((O_F @ C @ (H @ C.T)))
         o_F = (ho + beta * tr) / (1 - beta)
 
         return K_F, P_F, d_F, O_F, o_F

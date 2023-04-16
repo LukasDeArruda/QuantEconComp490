@@ -212,16 +212,16 @@ class Kalman:
         """
         # === simplify notation === #
         G, H = self.ss.G, self.ss.H
-        R = np.dot(H, H.T)
+        R = (H @ H.T)
 
         # === and then update === #
         y = np.atleast_2d(y)
         y.shape = self.ss.k, 1
-        E = np.dot(self.Sigma, G.T)
-        F = np.dot(np.dot(G, self.Sigma), G.T) + R
-        M = np.dot(E, inv(F))
-        self.x_hat = self.x_hat + np.dot(M, (y - np.dot(G, self.x_hat)))
-        self.Sigma = self.Sigma - np.dot(M, np.dot(G,  self.Sigma))
+        E = (self.Sigma @ G.T)
+        F = ((G @ self.Sigma) @ G.T) + R
+        M = (E @ inv(F))
+        self.x_hat = self.x_hat + (M @ (y - (G @ self.x_hat)))
+        self.Sigma = self.Sigma - (M @ (G @  self.Sigma))
 
     def filtered_to_forecast(self):
         """
@@ -232,7 +232,7 @@ class Kalman:
         """
         # === simplify notation === #
         A, C = self.ss.A, self.ss.C
-        Q = np.dot(C, C.T)
+        Q = (C @ C.T)
 
         # === and then update === #
         self.x_hat = np.dot(A, self.x_hat)
