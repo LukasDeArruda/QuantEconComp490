@@ -168,13 +168,13 @@ class DLE(object):
         zx = np.eye(self.A0.shape[0])-self.A0
         self.zz = nullspace(zx)
         self.zz /= self.zz[nnc]
-        self.css = self.Sc.dot(self.zz)
-        self.sss = self.Ss.dot(self.zz)
-        self.iss = self.Si.dot(self.zz)
-        self.dss = self.Sd.dot(self.zz)
-        self.bss = self.Sb.dot(self.zz)
-        self.kss = self.Sk.dot(self.zz)
-        self.hss = self.Sh.dot(self.zz)
+        self.css = self.Sc@(self.zz)
+        self.sss = self.Ss@(self.zz)
+        self.iss = self.Si@(self.zz)
+        self.dss = self.Sd@(self.zz)
+        self.bss = self.Sb@(self.zz)
+        self.kss = self.Sk@(self.zz)
+        self.hss = self.Sh@(self.zz)
 
     def compute_sequence(self, x0, ts_length=None, Pay=None):
         """
@@ -195,14 +195,14 @@ class DLE(object):
         lq = LQ(self.Q, self.R, self.A, self.B,
                 self.C, N=self.W, beta=self.beta)
         xp, up, wp = lq.compute_sequence(x0, ts_length)
-        self.h = self.Sh.dot(xp)
-        self.k = self.Sk.dot(xp)
-        self.i = self.Si.dot(xp)
-        self.b = self.Sb.dot(xp)
-        self.d = self.Sd.dot(xp)
-        self.c = self.Sc.dot(xp)
-        self.g = self.Sg.dot(xp)
-        self.s = self.Ss.dot(xp)
+        self.h = self.Sh@(xp)
+        self.k = self.Sk@(xp)
+        self.i = self.Si@(xp)
+        self.b = self.Sb@(xp)
+        self.d = self.Sd@(xp)
+        self.c = self.Sc@(xp)
+        self.g = self.Sg@(xp)
+        self.s = self.Ss@(xp)
 
         # === Value of J-period risk-free bonds === #
         # === See p.145: Equation (7.11.2) === #
@@ -212,12 +212,12 @@ class DLE(object):
         self.R2_Price = np.empty((ts_length + 1, 1))
         self.R5_Price = np.empty((ts_length + 1, 1))
         for i in range(ts_length + 1):
-            self.R1_Price[i, 0] = self.beta * e1.dot(self.Mc).dot(np.linalg.matrix_power(
-                self.A0, 1)).dot(xp[:, i]) / e1.dot(self.Mc).dot(xp[:, i])
-            self.R2_Price[i, 0] = self.beta**2 * e1.dot(self.Mc).dot(
-                np.linalg.matrix_power(self.A0, 2)).dot(xp[:, i]) / e1.dot(self.Mc).dot(xp[:, i])
-            self.R5_Price[i, 0] = self.beta**5 * e1.dot(self.Mc).dot(
-                np.linalg.matrix_power(self.A0, 5)).dot(xp[:, i]) / e1.dot(self.Mc).dot(xp[:, i])
+            self.R1_Price[i, 0] = self.beta * e1@(self.Mc)@(np.linalg.matrix_power(
+                self.A0, 1))@(xp[:, i]) / e1@(self.Mc)@(xp[:, i])
+            self.R2_Price[i, 0] = self.beta**2 * e1@(self.Mc)@(
+                np.linalg.matrix_power(self.A0, 2))@(xp[:, i]) / e1@(self.Mc)@(xp[:, i])
+            self.R5_Price[i, 0] = self.beta**5 * e1@(self.Mc)@(
+                np.linalg.matrix_power(self.A0, 5))@(xp[:, i]) / e1@(self.Mc)@(xp[:, i])
 
         # === Gross rates of return on 1-period risk-free bonds === #
         self.R1_Gross = 1 / self.R1_Price
