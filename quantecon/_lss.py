@@ -51,7 +51,7 @@ def simulate_linear_model(A, x0, v, ts_length):
     x = np.empty((n, ts_length))
     x[:, 0] = x0
     for t in range(ts_length-1):
-        # x[:, t+1] = A.dot(x[:, t]) + v[:, t]
+        x[:, t+1] = A @ (x[:, t]) + v[:, t]
         for i in range(n):
             x[i, t+1] = v[i, t]                   # Shock
             for j in range(n):
@@ -183,7 +183,7 @@ class LinearStateSpace:
         x0 = random_state.multivariate_normal(self.mu_0.flatten(),
                                               self.Sigma_0)
         w = random_state.standard_normal((self.m, ts_length-1))
-        v = self.C.dot(w)  # Multiply each w_t by C to get v_t = C w_t
+        v = self.C @ w  # Multiply each w_t by C to get v_t = C w_t
         # == simulate time series == #
         x = simulate_linear_model(self.A, x0, v, ts_length)
 
@@ -265,7 +265,7 @@ class LinearStateSpace:
         mu_x, Sigma_x = self.mu_0, self.Sigma_0
 
         while 1:
-            mu_y = G.dot(mu_x)
+            mu_y = G @ mu_x
             if H is None:
                 Sigma_y = G @ Sigma_x @ G.T
             else:

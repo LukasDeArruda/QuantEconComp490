@@ -261,7 +261,7 @@ def _compute_fixed_point_ig(T, v, max_iter, verbose, print_skip, is_approx_fp,
         _, rho = _get_mixed_actions(tableaux_curr, bases_curr)
 
         if Y.ndim <= 2:
-            x_new = rho.dot(Y[:m])
+            x_new = rho @ (Y[:m])
         else:
             shape_Y = Y.shape
             Y_2d = Y.reshape(shape_Y[0], np.prod(shape_Y[1:]))

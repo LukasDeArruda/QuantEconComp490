@@ -76,10 +76,10 @@ class DLE(object):
         uc = np.hstack((np.eye(self.nc), np.zeros((self.nc, self.ng))))
         ug = np.hstack((np.zeros((self.ng, self.nc)), np.eye(self.ng)))
         phiin = np.linalg.inv(np.hstack((self.phic, self.phig)))
-        phiinc = uc.dot(phiin)
-        b11 = - self.thetah.dot(phiinc).dot(self.phii)
-        a1 = self.thetah.dot(phiinc).dot(self.gamma)
-        a12 = np.vstack((self.thetah.dot(phiinc).dot(
+        phiinc = uc @ phiin
+        b11 = - self.thetah@(phiinc)@(self.phii)
+        a1 = self.thetah@(phiinc)@(self.gamma)
+        a12 = np.vstack((self.thetah@(phiinc)@(
             self.ud), np.zeros((self.nk, self.nz))))
 
         # === Creation of the A Matrix for the state transition of the LQ problem === #
@@ -100,11 +100,11 @@ class DLE(object):
 
         # === Define R,W and Q for the payoff function of the LQ problem === #
 
-        self.H = np.hstack((self.llambda, self.pih.dot(uc).dot(phiin).dot(self.gamma), self.pih.dot(
-            uc).dot(phiin).dot(self.ud) - self.ub, -self.pih.dot(uc).dot(phiin).dot(self.phii)))
-        self.G = ug.dot(phiin).dot(
+        self.H = np.hstack((self.llambda, self.pih@(uc)@(phiin)@(self.gamma), self.pih@(
+            uc)@(phiin)@(self.ud) - self.ub, -self.pih@(uc)@(phiin)@(self.phii)))
+        self.G = ug@(phiin)@(
             np.hstack((np.zeros((self.nd, self.nh)), self.gamma, self.ud, -self.phii)))
-        self.S = (self.G.T.dot(self.G) + self.H.T.dot(self.H)) / 2
+        self.S = (self.G.T@(self.G) + self.H.T@(self.H)) / 2
 
         self.nx = self.nh + self.nk + self.nz
         self.n = self.ni + self.nh + self.nk + self.nz
@@ -122,7 +122,7 @@ class DLE(object):
 
         # === Construct output matrices for our economy using the solution to the LQ problem === #
 
-        self.A0 = self.A - self.B.dot(self.F)
+        self.A0 = self.A - self.B@(self.F)
 
         self.Sh = self.A0[0:self.nh, 0:self.nx]
         self.Sk = self.A0[self.nh:self.nh + self.nk, 0:self.nx]
@@ -131,12 +131,12 @@ class DLE(object):
         self.Si = -self.F
         self.Sd = np.hstack((np.zeros((self.nd, self.nh + self.nk)), self.ud))
         self.Sb = np.hstack((np.zeros((self.nb, self.nh + self.nk)), self.ub))
-        self.Sc = uc.dot(phiin).dot(-self.phii.dot(self.Si) +
-                                    self.gamma.dot(self.Sk1) + self.Sd)
-        self.Sg = ug.dot(phiin).dot(-self.phii.dot(self.Si) +
-                                    self.gamma.dot(self.Sk1) + self.Sd)
-        self.Ss = self.llambda.dot(np.hstack((np.eye(self.nh), np.zeros(
-            (self.nh, self.nk + self.nz))))) + self.pih.dot(self.Sc)
+        self.Sc = uc@(phiin)@(-self.phii@(self.Si) +
+                                    self.gamma@(self.Sk1) + self.Sd)
+        self.Sg = ug@(phiin)@(-self.phii@(self.Si) +
+                                    self.gamma@(self.Sk1) + self.Sd)
+        self.Ss = self.llambda@(np.hstack((np.eye(self.nh), np.zeros(
+            (self.nh, self.nk + self.nz))))) + self.pih@(self.Sc)
 
         # ===  Calculate eigenvalues of A0 === #
         self.A110 = self.A0[0:self.nh + self.nk, 0:self.nh + self.nk]
