@@ -231,20 +231,20 @@ class DLE(object):
         # === Value of asset whose payout vector is Pay*xt === #
         # See p.145: Equation (7.11.1)
         if isinstance(Pay, np.ndarray) == True:
-            self.Za = Pay.T.dot(self.Mc)
+            self.Za = Pay.T@(self.Mc)
             self.Q = solve_discrete_lyapunov(
                 self.A0.T * self.beta**0.5, self.Za)
             self.q = self.beta / (1 - self.beta) * \
-                np.trace(self.C.T.dot(self.Q).dot(self.C))
+                np.trace(self.C.T@(self.Q)@(self.C))
             self.Pay_Price = np.empty((ts_length + 1, 1))
             self.Pay_Gross = np.empty((ts_length + 1, 1))
             self.Pay_Gross[0, 0] = np.nan
             for i in range(ts_length + 1):
-                self.Pay_Price[i, 0] = (xp[:, i].T.dot(self.Q).dot(
-                    xp[:, i]) + self.q) / e1.dot(self.Mc).dot(xp[:, i])
+                self.Pay_Price[i, 0] = (xp[:, i].T@(self.Q)@(
+                    xp[:, i]) + self.q) / e1@(self.Mc)@(xp[:, i])
             for i in range(ts_length):
                 self.Pay_Gross[i + 1, 0] = self.Pay_Price[i + 1,
-                                                          0] / (self.Pay_Price[i, 0] - Pay.dot(xp[:, i]))
+                                                          0] / (self.Pay_Price[i, 0] - Pay@(xp[:, i]))
         return
 
     def irf(self, ts_length=100, shock=None):
@@ -276,22 +276,22 @@ class DLE(object):
         self.b_irf = np.empty((ts_length, self.nb))
 
         for i in range(ts_length):
-            self.c_irf[i, :] = self.Sc.dot(
-                np.linalg.matrix_power(self.A0, i)).dot(self.C).dot(shock).T
-            self.s_irf[i, :] = self.Ss.dot(
-                np.linalg.matrix_power(self.A0, i)).dot(self.C).dot(shock).T
-            self.i_irf[i, :] = self.Si.dot(
-                np.linalg.matrix_power(self.A0, i)).dot(self.C).dot(shock).T
-            self.k_irf[i, :] = self.Sk.dot(
-                np.linalg.matrix_power(self.A0, i)).dot(self.C).dot(shock).T
-            self.h_irf[i, :] = self.Sh.dot(
-                np.linalg.matrix_power(self.A0, i)).dot(self.C).dot(shock).T
-            self.g_irf[i, :] = self.Sg.dot(
-                np.linalg.matrix_power(self.A0, i)).dot(self.C).dot(shock).T
-            self.d_irf[i, :] = self.Sd.dot(
-                np.linalg.matrix_power(self.A0, i)).dot(self.C).dot(shock).T
-            self.b_irf[i, :] = self.Sb.dot(
-                np.linalg.matrix_power(self.A0, i)).dot(self.C).dot(shock).T
+            self.c_irf[i, :] = self.Sc@(
+                np.linalg.matrix_power(self.A0, i))@(self.C)@(shock).T
+            self.s_irf[i, :] = self.Ss@(
+                np.linalg.matrix_power(self.A0, i))@(self.C)@(shock).T
+            self.i_irf[i, :] = self.Si@(
+                np.linalg.matrix_power(self.A0, i))@(self.C)@(shock).T
+            self.k_irf[i, :] = self.Sk@(
+                np.linalg.matrix_power(self.A0, i))@(self.C)@(shock).T
+            self.h_irf[i, :] = self.Sh@(
+                np.linalg.matrix_power(self.A0, i))@(self.C)@(shock).T
+            self.g_irf[i, :] = self.Sg@(
+                np.linalg.matrix_power(self.A0, i))@(self.C)@(shock).T
+            self.d_irf[i, :] = self.Sd@(
+                np.linalg.matrix_power(self.A0, i))@(self.C)@(shock).T
+            self.b_irf[i, :] = self.Sb@(
+                np.linalg.matrix_power(self.A0, i))@(self.C)@(shock).T
 
         return
 
@@ -305,13 +305,13 @@ class DLE(object):
         Ac2 = np.hstack((np.zeros((self.nz, self.nh)), self.a22))
         Ac = np.vstack((Ac1, Ac2))
         Bc = np.vstack((self.thetah, np.zeros((self.nz, self.nc))))
-        Rc1 = np.hstack((self.llambda.T.dot(self.llambda), -
-                         self.llambda.T.dot(self.ub)))
-        Rc2 = np.hstack((-self.ub.T.dot(self.llambda), self.ub.T.dot(self.ub)))
+        Rc1 = np.hstack((self.llambda.T@(self.llambda), -
+                         self.llambda.T@(self.ub)))
+        Rc2 = np.hstack((-self.ub.T@(self.llambda), self.ub.T@(self.ub)))
         Rc = np.vstack((Rc1, Rc2))
-        Qc = self.pih.T.dot(self.pih)
+        Qc = self.pih.T@(self.pih)
         Nc = np.hstack(
-            (self.pih.T.dot(self.llambda), -self.pih.T.dot(self.ub)))
+            (self.pih.T@(self.llambda), -self.pih.T@(self.ub)))
 
         lq_aux = LQ(Qc, Rc, Ac, Bc, N=Nc, beta=self.beta)
 
@@ -320,9 +320,9 @@ class DLE(object):
         self.F_b = F1[:, 0:self.nh]
         self.F_f = F1[:, self.nh:]
 
-        self.pihat = np.linalg.cholesky(self.pih.T.dot(
-            self.pih) + self.beta.dot(self.thetah.T).dot(P1[0:self.nh, 0:self.nh]).dot(self.thetah)).T
-        self.llambdahat = self.pihat.dot(self.F_b)
-        self.ubhat = - self.pihat.dot(self.F_f)
+        self.pihat = np.linalg.cholesky(self.pih.T@(
+            self.pih) + self.beta@(self.thetah.T)@(P1[0:self.nh, 0:self.nh])@(self.thetah)).T
+        self.llambdahat = self.pihat@(self.F_b)
+        self.ubhat = - self.pihat@(self.F_f)
 
         return
