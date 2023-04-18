@@ -179,11 +179,11 @@ def solve_discrete_riccati(A, B, Q, R, N=None, tolerance=1e-10, max_iter=500,
         if cn * EPS < 1:
             Q_tilde = - Q + ((N.T @ solve(Z, N + gamma * BTA)) + gamma * I)
             G0 = (B @ solve(Z, B.T))
-            A0 = np.dot(I - gamma * G0, A) - np.dot(B, solve(Z, N))
-            H0 = gamma * np.dot(A.T, A0) - Q_tilde
+            A0 = (I - gamma * G0 @ A) - (B @ solve(Z, N))
+            H0 = gamma * (A.T @ A0) - Q_tilde
             f1 = np.linalg.cond(Z, np.inf)
             f2 = gamma * f1
-            f3 = np.linalg.cond(I + np.dot(G0, H0))
+            f3 = np.linalg.cond(I + (G0 @ H0))
             f_gamma = max(f1, f2, f3)
             if f_gamma < current_min:
                 best_gamma = gamma
@@ -198,10 +198,10 @@ def solve_discrete_riccati(A, B, Q, R, N=None, tolerance=1e-10, max_iter=500,
     R_hat = R + gamma * BB
 
     # == Initial conditions == #
-    Q_tilde = - Q + np.dot(N.T, solve(R_hat, N + gamma * BTA)) + gamma * I
-    G0 = np.dot(B, solve(R_hat, B.T))
-    A0 = np.dot(I - gamma * G0, A) - np.dot(B, solve(R_hat, N))
-    H0 = gamma * np.dot(A.T, A0) - Q_tilde
+    Q_tilde = - Q + (N.T @ solve(R_hat, N + gamma * BTA)) + gamma * I
+    G0 = (B @ solve(R_hat, B.T))
+    A0 = (I - gamma * G0 @ A) - (B @ solve(R_hat, N))
+    H0 = gamma * (A.T @ A0) - Q_tilde
     i = 1
 
     # == Main loop == #
@@ -211,9 +211,9 @@ def solve_discrete_riccati(A, B, Q, R, N=None, tolerance=1e-10, max_iter=500,
             raise ValueError(fail_msg.format(i))
 
         else:
-            A1 = np.dot(A0, solve(I + np.dot(G0, H0), A0))
-            G1 = G0 + np.dot(np.dot(A0, G0), solve(I + np.dot(H0, G0), A0.T))
-            H1 = H0 + np.dot(A0.T, solve(I + np.dot(H0, G0), np.dot(H0, A0)))
+            A1 = (A0 @ solve(I + (G0 @ H0), A0))
+            G1 = G0 + ((A0 @ G0) @ solve(I + (H0 @ G0), A0.T))
+            H1 = H0 + (A0.T @ solve(I + (H0 @ G0), (H0 @ A0)))
 
             error = np.max(np.abs(H1 - H0))
             A0 = A1
