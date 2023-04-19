@@ -266,7 +266,7 @@ def _compute_fixed_point_ig(T, v, max_iter, verbose, print_skip, is_approx_fp,
         else:
             shape_Y = Y.shape
             Y_2d = Y.reshape(shape_Y[0], np.prod(shape_Y[1:]))
-            x_new = rho.dot(Y_2d[:m]).reshape(shape_Y[1:])
+            x_new = (rho @ Y_2d[:m]).reshape(shape_Y[1:])
 
     if verbose == 2:
         error = np.max(np.abs(y_new - x_new))
