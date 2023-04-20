@@ -5,10 +5,12 @@ TODO: 1. Fix warnings concerning casting complex variables back to floats
 
 """
 import numpy as np
+
+from ._time_series_model import TimeSeriesModel
 from .util import check_random_state
 
 
-class ARMA:
+class ARMA(TimeSeriesModel):
     r"""
     This class represents scalar ARMA(p, q) processes.
 
@@ -248,11 +250,13 @@ class ARMA:
             A simulation of the model that corresponds to this class
 
         """
-        from scipy.signal import dlsim
-        random_state = check_random_state(random_state)
+        # from scipy.signal import dlsim
+        # random_state = check_random_state(random_state)
+        #
+        # sys = self.ma_poly, self.ar_poly, 1
+        # u = random_state.standard_normal((ts_length, 1)) * self.sigma
+        # vals = dlsim(sys, u)[1]
 
-        sys = self.ma_poly, self.ar_poly, 1
-        u = random_state.standard_normal((ts_length, 1)) * self.sigma
-        vals = dlsim(sys, u)[1]
+        vals = super().simulate(ts_length=ts_length, random_state=random_state)
 
         return vals.flatten()
