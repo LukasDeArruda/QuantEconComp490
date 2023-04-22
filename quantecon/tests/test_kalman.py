@@ -17,8 +17,8 @@ class TestKalman:
         self.G = np.eye(2) * .5
         self.H = np.eye(2) * np.sqrt(0.2)
 
-        self.Q = np.dot(self.C, self.C.T)
-        self.R = np.dot(self.H, self.H.T)
+        self.Q = self.C @ self.C.T
+        self.R = self.H @ self.H.T
 
         ss = LinearStateSpace(self.A, self.C, self.G, self.H)
 
@@ -43,7 +43,7 @@ class TestKalman:
 
             # Compute the kalmain gain and sigma infinity according to the
             # recursive equations and compare
-            kal_recursion = np.dot(A, sig_inf).dot(G.T).dot(mat_inv)
+            kal_recursion = A @ sig_inf @ G.T @ mat_inv
             sig_recursion = (A@(sig_inf)@(A.T) -
                                 kal_recursion@(G)@(sig_inf)@(A.T) + Q)
 
@@ -77,7 +77,7 @@ class TestKalman:
         kf.update(y_observed)
 
         mat_inv = np.linalg.inv(G@(curr_sigma)@(G.T) + R)
-        curr_k = np.dot(A, curr_sigma).dot(G.T).dot(mat_inv)
+        curr_k = A @ curr_sigma @ G.T @ mat_inv
         new_sigma = (A@(curr_sigma)@(A.T) -
                     curr_k@(G)@(curr_sigma)@(A.T) + Q)
 

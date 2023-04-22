@@ -182,9 +182,9 @@ class Kalman:
         A, C, G, H = self.A, self.C, self.G, self.H
 
         Atil = np.vstack([np.hstack([A, np.zeros((n, n)), np.zeros((n, l))]),
-                          np.hstack([np.dot(K, G),
-                                     A-np.dot(K, G),
-                                     np.dot(K, H)]),
+                          np.hstack([K @ G,
+                                     A-(K @ G),
+                                     K @ H]),
                           np.zeros((l, 2*n + l))])
 
         Ctil = np.vstack([np.hstack([C, np.zeros((n, l))]),
