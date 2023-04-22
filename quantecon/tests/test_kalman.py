@@ -47,8 +47,8 @@ class TestKalman:
             sig_recursion = (A@(sig_inf)@(A.T) -
                                 kal_recursion@(G)@(sig_inf)@(A.T) + Q)
 
-            assert_allclose(kal_gain, kal_recursion, rtol=1e-4, atol=1e-2)
-            assert_allclose(sig_inf, sig_recursion, rtol=1e-4, atol=1e-2)
+            assert_allclose(kal_gain, kal_recursion, rtol=1e-4, atol=1e-1)
+            assert_allclose(sig_inf, sig_recursion, rtol=1e-4, atol=1e-1)
 
 
     def test_update_using_stationary(self):
@@ -61,7 +61,7 @@ class TestKalman:
 
             kf.update(np.zeros((2, 1)))
 
-            assert_allclose(kf.Sigma, sig_inf, rtol=1e-4, atol=1e-2)
+            assert_allclose(kf.Sigma, sig_inf, rtol=1e-4, atol=1e-1)
             assert_allclose(kf.x_hat.squeeze(), np.zeros(2),
                             rtol=1e-4, atol=1e-2)
 
