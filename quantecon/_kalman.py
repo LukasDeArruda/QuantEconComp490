@@ -63,11 +63,19 @@ class Kalman:
 
     """
 
-    def __init__(self, ss=None, A=None, C=None, G=None, H=None, mu_0=None, Sigma_0=None, x_hat=None, Sigma=None):
+    def __init__(self, A=None, C=None, G=None, H=None, mu_0=None, Sigma_0=None, x_hat=None, Sigma=None):
         print(H)
-        if type(ss) is LinearStateSpace:
-            self.ss = ss
+        if type(A) is LinearStateSpace:
+            self.ss = A
+            self.A = self.ss.A
+            self.C = self.ss.C
+            self.G = self.ss.G
+            self.H = self.ss.H
         elif type(A) in [np.ndarray, list, np.array]:
+            self.A = A
+            self.C = C
+            self.G = G
+            self.H = H
             self.ss = LinearStateSpace(A, C, G, H, mu_0, Sigma_0)
             # print(A, C, G, H)
             # print("ss is", ss)
@@ -171,12 +179,12 @@ class Kalman:
 
         # Get the matrix sizes
         n, k, m, l = self.ss.n, self.ss.k, self.ss.m, self.ss.l
-        A, C, G, H = self.ss.A, self.ss.C, self.ss.G, self.ss.H
+        A, C, G, H = self.A, self.C, self.G, self.H
 
         Atil = np.vstack([np.hstack([A, np.zeros((n, n)), np.zeros((n, l))]),
-                          np.hstack([np.dot(K, G),
-                                     A-np.dot(K, G),
-                                     np.dot(K, H)]),
+                          np.hstack([K @ G,
+                                     A-(K @ G),
+                                     K @ H]),
                           np.zeros((l, 2*n + l))])
 
         Ctil = np.vstack([np.hstack([C, np.zeros((n, l))]),
@@ -211,7 +219,7 @@ class Kalman:
 
         """
         # === simplify notation === #
-        G, H = self.ss.G, self.ss.H
+        G, H = self.G, self.H
         R = (H @ H.T)
 
         # === and then update === #
@@ -231,7 +239,7 @@ class Kalman:
 
         """
         # === simplify notation === #
-        A, C = self.ss.A, self.ss.C
+        A, C = self.A, self.C
         Q = (C @ C.T)
 
         # === and then update === #
@@ -276,7 +284,7 @@ class Kalman:
         """
 
         # === simplify notation === #
-        A, C, G, H = self.ss.A, self.ss.C, self.ss.G, self.ss.H
+        A, C, G, H = self.A, self.C, self.G, self.H
         Q, R = C @ C.T, H @ H.T
 
         # === solve Riccati equation, obtain Kalman gain === #
@@ -303,7 +311,7 @@ class Kalman:
             moving average or 'var' for VAR.
         """
         # == simplify notation == #
-        A, G = self.ss.A, self.ss.G
+        A, G = self.A, self.G
         K_infinity = self.K_infinity
         # == compute and return coefficients == #
         coeffs = []
@@ -326,7 +334,7 @@ class Kalman:
 
     def stationary_innovation_covar(self):
         # == simplify notation == #
-        H, G = self.ss.H, self.ss.G
+        H, G = self.H, self.G
         R = H @ H.T
         Sigma_infinity = self.Sigma_infinity
 
