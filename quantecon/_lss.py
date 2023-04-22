@@ -8,6 +8,8 @@ import numpy as np
 from scipy.linalg import solve
 from ._matrix_eqn import solve_discrete_lyapunov
 from numba import jit
+
+from ._time_series_model import TimeSeriesModel
 from .util import check_random_state
 
 
@@ -59,7 +61,7 @@ def simulate_linear_model(A, x0, v, ts_length):
     return x
 
 
-class LinearStateSpace:
+class LinearStateSpace(TimeSeriesModel):
     r"""
     A class that describes a Gaussian linear state space model of the
     form:
@@ -178,20 +180,22 @@ class LinearStateSpace:
             A k x ts_length array, where the t-th column is :math:`y_t`
 
         """
-        random_state = check_random_state(random_state)
-
-        x0 = random_state.multivariate_normal(self.mu_0.flatten(),
-                                              self.Sigma_0)
-        w = random_state.standard_normal((self.m, ts_length-1))
-        v = self.C @ w  # Multiply each w_t by C to get v_t = C w_t
-        # == simulate time series == #
-        x = simulate_linear_model(self.A, x0, v, ts_length)
-
-        if self.H is not None:
-            v = random_state.standard_normal((self.l, ts_length))
-            y = self.G @ x + self.H @ v
-        else:
-            y = self.G @ x
+        # random_state = check_random_state(random_state)
+        #
+        # x0 = random_state.multivariate_normal(self.mu_0.flatten(),
+        #                                       self.Sigma_0)
+        # w = random_state.standard_normal((self.m, ts_length-1))
+        # v = self.C @ w  # Multiply each w_t by C to get v_t = C w_t
+        # # == simulate time series == #
+        # x = simulate_linear_model(self.A, x0, v, ts_length)
+        #
+        # if self.H is not None:
+        #     v = random_state.standard_normal((self.l, ts_length))
+        #     y = self.G @ x + self.H @ v
+        # else:
+        #     y = self.G @ x
+        x = super().simulate(ts_length=ts_length, random_state=random_state)[1]
+        y = super().simulate(ts_length=ts_length, random_state=random_state)[2]
 
         return x, y
 

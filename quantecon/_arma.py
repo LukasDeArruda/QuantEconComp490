@@ -250,13 +250,7 @@ class ARMA(TimeSeriesModel):
             A simulation of the model that corresponds to this class
 
         """
-        # from scipy.signal import dlsim
-        # random_state = check_random_state(random_state)
-        #
-        # sys = self.ma_poly, self.ar_poly, 1
-        # u = random_state.standard_normal((ts_length, 1)) * self.sigma
-        # vals = dlsim(sys, u)[1]
 
-        vals = super().simulate(ts_length=ts_length, random_state=random_state)
+        vals = super().simulate(ts_length=ts_length, random_state=random_state)[0]
 
         return vals.flatten()
