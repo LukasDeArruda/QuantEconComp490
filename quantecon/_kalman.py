@@ -12,11 +12,12 @@ from textwrap import dedent
 import numpy
 import numpy as np
 from scipy.linalg import inv
+
+from ._consolidated_model import Consolidated
 from ._lss import LinearStateSpace
 from ._matrix_eqn import solve_discrete_riccati
 
-
-class Kalman:
+class Kalman(Consolidated):
     r"""
     Implements the Kalman filter for the Gaussian state space model
 

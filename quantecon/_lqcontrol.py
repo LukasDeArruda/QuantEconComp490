@@ -10,9 +10,9 @@ from scipy.linalg import solve
 from ._matrix_eqn import solve_discrete_riccati, solve_discrete_riccati_system
 from .util import check_random_state
 from .markov import MarkovChain
+from ._consolidated_model import Consolidated
 
-
-class LQ:
+class LQ(Consolidated):
     r"""
     This class is for analyzing linear quadratic optimal control
     problems of either the infinite horizon form
@@ -338,7 +338,7 @@ class LQ:
         return x_path, u_path, w_path
 
 
-class LQMarkov:
+class LQMarkov(Consolidated):
     r"""
     This class is for analyzing Markov jump linear quadratic optimal
     control problems of the infinite horizon form
