@@ -3,10 +3,7 @@ from scipy.signal import dlsim
 
 import quantecon
 from quantecon.util import check_random_state
-from textwrap import dedent
 import numpy as np
-from scipy.linalg import solve
-from ._matrix_eqn import solve_discrete_lyapunov
 from numba import jit
 
 @jit(nopython=True)

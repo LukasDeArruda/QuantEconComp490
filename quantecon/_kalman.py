@@ -261,42 +261,6 @@ class Kalman(Consolidated):
         self.prior_to_filtered(y)
         self.filtered_to_forecast()
 
-    def stationary_values(self, method='doubling'):
-        r"""
-        Computes the limit of :math:`\Sigma_t` as t goes to infinity by
-        solving the associated Riccati equation. The outputs are stored in the
-        attributes `K_infinity` and `Sigma_infinity`. Computation is via the
-        doubling algorithm (default) or a QZ decomposition method (see the
-        documentation in `matrix_eqn.solve_discrete_riccati`).
-
-        Parameters
-        ----------
-        method : str, optional(default="doubling")
-            Solution method used in solving the associated Riccati
-            equation, str in {'doubling', 'qz'}.
-
-        Returns
-        -------
-        Sigma_infinity : array_like or scalar(float)
-            The infinite limit of :math:`\Sigma_t`
-        K_infinity : array_like or scalar(float)
-            The stationary Kalman gain.
-
-        """
-
-        # === simplify notation === #
-        A, C, G, H = self.A, self.C, self.G, self.H
-        Q, R = C @ C.T, H @ H.T
-
-        # === solve Riccati equation, obtain Kalman gain === #
-        Sigma_infinity = solve_discrete_riccati(A.T, G.T, Q, R, method=method)
-        temp1 = A @ Sigma_infinity @ G.T
-        temp2 = inv(G @ Sigma_infinity @ G.T + R)
-        K_infinity = temp1 @ temp2
-
-        # == record as attributes and return == #
-        self._Sigma_infinity, self._K_infinity = Sigma_infinity, K_infinity
-        return Sigma_infinity, K_infinity
 
     def stationary_coefficients(self, j, coeff_type='ma'):
         """

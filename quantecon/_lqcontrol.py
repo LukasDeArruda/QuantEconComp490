@@ -197,62 +197,6 @@ class LQ(Consolidated):
         # == Set new state == #
         self.P, self.d = new_P, new_d
 
-    def stationary_values(self, method='doubling'):
-        """
-        Computes the matrix :math:`P` and scalar :math:`d` that represent
-        the value function
-
-        .. math::
-
-             V(x) = x' P x + d
-
-        in the infinite horizon case.  Also computes the control matrix
-        :math:`F` from :math:`u = - Fx`. Computation is via the solution
-        algorithm as specified by the `method` option (default to the
-        doubling algorithm) (see the documentation in
-        `matrix_eqn.solve_discrete_riccati`).
-
-        Parameters
-        ----------
-        method : str, optional(default='doubling')
-            Solution method used in solving the associated Riccati
-            equation, str in {'doubling', 'qz'}.
-
-        Returns
-        -------
-        P : array_like(float)
-            P is part of the value function representation of
-            :math:`V(x) = x'Px + d`
-        F : array_like(float)
-            F is the policy rule that determines the choice of control
-            in each period.
-        d : array_like(float)
-            d is part of the value function representation of
-            :math:`V(x) = x'Px + d`
-
-        """
-        # === simplify notation === #
-        Q, R, A, B, N, C = self.Q, self.R, self.A, self.B, self.N, self.C
-
-        # === solve Riccati equation, obtain P === #
-        A0, B0 = np.sqrt(self.beta) * A, np.sqrt(self.beta) * B
-        P = solve_discrete_riccati(A0, B0, R, Q, N, method=method)
-
-        # == Compute F == #
-        S1 = Q + self.beta * np.dot(B.T, np.dot(P, B))
-        S2 = self.beta * np.dot(B.T, np.dot(P, A)) + N
-        F = solve(S1, S2)
-
-        # == Compute d == #
-        if self.beta == 1:
-            d = 0
-        else:
-            d = self.beta * np.trace(np.dot(P, np.dot(C, C.T))) / (1 - self.beta)
-
-        # == Bind states and return values == #
-        self.P, self.F, self.d = P, F, d
-
-        return P, F, d
 
     def compute_sequence(self, x0, ts_length=None, method='doubling',
                          random_state=None):
@@ -478,72 +422,6 @@ class LQMarkov(Consolidated):
         return dedent(m.format(b=self.beta, m=self.m, n=self.n, k=self.k,
                                j=self.j, t=t))
 
-    def stationary_values(self, max_iter=1000):
-        """
-        Computes the matrix :math:`P(s)` and scalar :math:`d(s)` that
-        represent the value function
-
-        .. math::
-
-             V(x, s) = x' P(s) x + d(s)
-
-        in the infinite horizon case.  Also computes the control matrix
-        :math:`F` from :math:`u = - F(s) x`.
-
-        Parameters
-        ----------
-        max_iter : scalar(int), optional(default=1000)
-            The maximum number of iterations allowed
-
-        Returns
-        -------
-        Ps : array_like(float)
-            Ps is part of the value function representation of
-            :math:`V(x, s) = x' P(s) x + d(s)`
-        ds : array_like(float)
-            ds is part of the value function representation of
-            :math:`V(x, s) = x' P(s) x + d(s)`
-        Fs : array_like(float)
-            Fs is the policy rule that determines the choice of control in
-            each period at each Markov state
-
-        """
-
-        # == Simplify notations == #
-        beta, Π = self.beta, self.Π
-        m, n, k = self.m, self.n, self.k
-        As, Bs, Cs = self.As, self.Bs, self.Cs
-        Qs, Rs, Ns = self.Qs, self.Rs, self.Ns
-
-        # == Solve for P(s) by iterating discrete riccati system== #
-        Ps = solve_discrete_riccati_system(Π, As, Bs, Cs, Qs, Rs, Ns, beta,
-                                           max_iter=max_iter)
-
-        # == calculate F and d == #
-        Fs = np.array([np.empty((k, n)) for i in range(m)])
-        X = np.empty((m, m))
-        sum1, sum2 = np.empty((k, k)), np.empty((k, n))
-        for i in range(m):
-            # CCi = C_i C_i'
-            CCi = Cs[i] @ Cs[i].T
-            sum1[:, :] = 0.
-            sum2[:, :] = 0.
-            for j in range(m):
-                # for F
-                sum1 += beta * Π[i, j] * Bs[i].T @ Ps[j] @ Bs[i]
-                sum2 += beta * Π[i, j] * Bs[i].T @ Ps[j] @ As[i]
-
-                # for d
-                X[j, i] = np.trace(Ps[j] @ CCi)
-
-            Fs[i][:, :] = solve(Qs[i] + sum1, sum2 + Ns[i])
-
-        ds = solve(np.eye(m) - beta * Π,
-                   np.diag(beta * Π @ X).reshape((m, 1))).flatten()
-
-        self.Ps, self.ds, self.Fs = Ps, ds, Fs
-
-        return Ps, ds, Fs
 
     def compute_sequence(self, x0, ts_length=None, random_state=None):
         """

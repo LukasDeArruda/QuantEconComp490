@@ -1,9 +1,8 @@
-import quantecon._kalman
-import quantecon._lqcontrol
-from ._matrix_eqn import solve_discrete_riccati
+import quantecon
 from scipy.linalg import inv
 import numpy as np
 from scipy.linalg import solve
+from ._matrix_eqn import solve_discrete_riccati, solve_discrete_riccati_system
 
 class Consolidated:
     def __init__(self):
@@ -50,3 +49,38 @@ class Consolidated:
 
             return P, F, d
 
+        elif type(self) == quantecon._lqcontrol.LQMarkov:
+            beta, Π = self.beta, self.Π
+            m, n, k = self.m, self.n, self.k
+            As, Bs, Cs = self.As, self.Bs, self.Cs
+            Qs, Rs, Ns = self.Qs, self.Rs, self.Ns
+
+            # == Solve for P(s) by iterating discrete riccati system== #
+            Ps = solve_discrete_riccati_system(Π, As, Bs, Cs, Qs, Rs, Ns, beta,
+                                               max_iter=max_iter)
+
+            # == calculate F and d == #
+            Fs = np.array([np.empty((k, n)) for i in range(m)])
+            X = np.empty((m, m))
+            sum1, sum2 = np.empty((k, k)), np.empty((k, n))
+            for i in range(m):
+                # CCi = C_i C_i'
+                CCi = Cs[i] @ Cs[i].T
+                sum1[:, :] = 0.
+                sum2[:, :] = 0.
+                for j in range(m):
+                    # for F
+                    sum1 += beta * Π[i, j] * Bs[i].T @ Ps[j] @ Bs[i]
+                    sum2 += beta * Π[i, j] * Bs[i].T @ Ps[j] @ As[i]
+
+                    # for d
+                    X[j, i] = np.trace(Ps[j] @ CCi)
+
+                Fs[i][:, :] = solve(Qs[i] + sum1, sum2 + Ns[i])
+
+            ds = solve(np.eye(m) - beta * Π,
+                       np.diag(beta * Π @ X).reshape((m, 1))).flatten()
+
+            self.Ps, self.ds, self.Fs = Ps, ds, Fs
+
+            return Ps, ds, Fs
