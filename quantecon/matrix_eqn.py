@@ -3,11 +3,12 @@
 # included below.
 
 import warnings
-from . import _matrix_eqn
-
+from . import _matrix_eqn, solve_discrete_lyapunov, solve_discrete_riccati
 
 __all__ = ['solve_discrete_lyapunov', 'solve_discrete_riccati',
            'solve_discrete_riccati_system']
+
+from ._matrix_eqn import solve_discrete_riccati_system
 
 
 def __dir__():

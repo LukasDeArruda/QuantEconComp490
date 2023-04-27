@@ -3,8 +3,7 @@
 # included below.
 
 import warnings
-from . import _lqcontrol
-
+from . import _lqcontrol, LQMarkov, LQ
 
 __all__ = ['LQ', 'LQMarkov']
 

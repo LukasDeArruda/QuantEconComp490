@@ -185,9 +185,9 @@ class LQ(Consolidated):
         Q, R, A, B, N, C = self.Q, self.R, self.A, self.B, self.N, self.C
         P, d = self.P, self.d
         # == Some useful matrices == #
-        S1 = Q + self.beta * np.dot(B.T, np.dot(P, B))
-        S2 = self.beta * np.dot(B.T, np.dot(P, A)) + N
-        S3 = self.beta * np.dot(A.T, np.dot(P, A))
+        S1 = Q + self.beta * (B.T @ (P @ B))
+        S2 = self.beta * (B.T @ (P @ A)) + N
+        S3 = self.beta * (A.T @ (P @ A))
         # == Compute F as (Q + B'PB)^{-1} (beta B'PA + N) == #
         self.F = solve(S1, S2)
         # === Shift P back in time one step == #
