@@ -34,15 +34,15 @@ class Consolidated:
             P = solve_discrete_riccati(A0, B0, R, Q, N, method=method)
 
             # == Compute F == #
-            S1 = Q + self.beta * np.dot(B.T, np.dot(P, B))
-            S2 = self.beta * np.dot(B.T, np.dot(P, A)) + N
+            S1 = Q + self.beta * (B.T @ (P @ B))
+            S2 = self.beta * (B.T @ (P @ A)) + N
             F = solve(S1, S2)
 
             # == Compute d == #
             if self.beta == 1:
                 d = 0
             else:
-                d = self.beta * np.trace(np.dot(P, np.dot(C, C.T))) / (1 - self.beta)
+                d = self.beta * np.trace((P @ (C @ C.T))) / (1 - self.beta)
 
             # == Bind states and return values == #
             self.P, self.F, self.d = P, F, d

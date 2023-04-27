@@ -244,8 +244,8 @@ class Kalman(Consolidated):
         Q = (C @ C.T)
 
         # === and then update === #
-        self.x_hat = np.dot(A, self.x_hat)
-        self.Sigma = np.dot(A, np.dot(self.Sigma, A.T)) + Q
+        self.x_hat = (A @ self.x_hat)
+        self.Sigma = (A @ (self.Sigma @ A.T)) + Q
 
     def update(self, y):
         """

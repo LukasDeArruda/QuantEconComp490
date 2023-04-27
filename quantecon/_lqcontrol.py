@@ -191,9 +191,9 @@ class LQ(Consolidated):
         # == Compute F as (Q + B'PB)^{-1} (beta B'PA + N) == #
         self.F = solve(S1, S2)
         # === Shift P back in time one step == #
-        new_P = R - np.dot(S2.T, self.F) + S3
+        new_P = R - (S2.T @ self.F) + S3
         # == Recalling that trace(AB) = trace(BA) == #
-        new_d = self.beta * (d + np.trace(np.dot(P, np.dot(C, C.T))))
+        new_d = self.beta * (d + np.trace((P @ (C @ C.T))))
         # == Set new state == #
         self.P, self.d = new_P, new_d
 
@@ -258,7 +258,7 @@ class LQ(Consolidated):
         x_path = np.empty((self.n, T+1))
         u_path = np.empty((self.k, T))
         w_path = random_state.standard_normal((self.j, T+1))
-        Cw_path = np.dot(C, w_path)
+        Cw_path = (C @ w_path)
 
         # == Compute and record the sequence of policies == #
         policies = []
@@ -270,13 +270,13 @@ class LQ(Consolidated):
         # == Use policy sequence to generate states and controls == #
         F = policies.pop()
         x_path[:, 0] = x0.flatten()
-        u_path[:, 0] = - np.dot(F, x0).flatten()
+        u_path[:, 0] = - (F @ x0).flatten()
         for t in range(1, T):
             F = policies.pop()
-            Ax, Bu = np.dot(A, x_path[:, t-1]), np.dot(B, u_path[:, t-1])
+            Ax, Bu = (A @ x_path[:, t-1]), (B @ u_path[:, t-1])
             x_path[:, t] = Ax + Bu + Cw_path[:, t]
-            u_path[:, t] = - np.dot(F, x_path[:, t])
-        Ax, Bu = np.dot(A, x_path[:, T-1]), np.dot(B, u_path[:, T-1])
+            u_path[:, t] = - (F @ x_path[:, t])
+        Ax, Bu = (A @ x_path[:, T-1]), (B @ u_path[:, T-1])
         x_path[:, T] = Ax + Bu + Cw_path[:, T]
 
         return x_path, u_path, w_path

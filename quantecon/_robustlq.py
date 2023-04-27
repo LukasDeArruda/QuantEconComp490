@@ -387,7 +387,7 @@ class RBLQ:
         # == Solve for policies and costs using agent 2's problem == #
         K_F, P_F = self.F_to_K(F)
         I = np.identity(self.j)
-        H = inv(I - C.T @ (P_F.dot(C)) / theta)
+        H = inv(I - C.T @ (P_F @ (C)) / theta)
         d_F = np.log(det(H))
 
         # == Compute O_F and o_F == #
