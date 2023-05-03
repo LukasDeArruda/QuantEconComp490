@@ -63,6 +63,7 @@ class TimeSeriesModel:
 
     def simulate(self, ts_length=90, random_state=None):
         """
+        ***ARMA Class***
         Compute a simulated sample path for the time series model.
 
         Parameters
@@ -81,17 +82,46 @@ class TimeSeriesModel:
         vals : array_like, shape (ts_length,)
             A simulation of the time series model.
 
-        """
-        if type(self) == quantecon._arma.ARMA:
-            print(type(self))
-            random_state = check_random_state(random_state)
 
+        ***LSS Class***
+        Simulate a time series of length ts_length, first drawing
+
+        .. math::
+
+            x_0 \sim N(\mu_0, \Sigma_0)
+
+        Parameters
+        ----------
+        ts_length : scalar(int), optional(default=100)
+            The length of the simulation
+        random_state : int or np.random.RandomState/Generator, optional
+            Random seed (integer) or np.random.RandomState or Generator
+            instance to set the initial state of the random number
+            generator for reproducibility. If None, a randomly
+            initialized RandomState is used.
+
+        Returns
+        -------
+        x : array_like(float)
+            An n x ts_length array, where the t-th column is :math:`x_t`
+        y : array_like(float)
+            A k x ts_length array, where the t-th column is :math:`y_t`
+
+        """
+
+
+        if type(self) == quantecon._arma.ARMA:
+            random_state = check_random_state(random_state)
             sys = self.ma_poly, self.ar_poly, 1
             u = random_state.standard_normal((ts_length, 1)) * self.sigma
             vals = dlsim(sys, u)[1]
             vals = vals.flatten()
             x = 0
             y = 0
+            vals = vals[0]
+
+            return vals.flatten()
+
         elif type(self) == quantecon._lss.LinearStateSpace:
             random_state = check_random_state(random_state)
             vals = []
@@ -108,4 +138,4 @@ class TimeSeriesModel:
             else:
                 y = self.G @ x
 
-        return vals, x, y
+            return x, y

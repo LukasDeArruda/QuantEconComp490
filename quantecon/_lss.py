@@ -154,50 +154,6 @@ class LinearStateSpace(TimeSeriesModel):
         """
         return np.atleast_2d(np.asarray(x, dtype='float'))
 
-    def simulate(self, ts_length=100, random_state=None):
-        r"""
-        Simulate a time series of length ts_length, first drawing
-
-        .. math::
-
-            x_0 \sim N(\mu_0, \Sigma_0)
-
-        Parameters
-        ----------
-        ts_length : scalar(int), optional(default=100)
-            The length of the simulation
-        random_state : int or np.random.RandomState/Generator, optional
-            Random seed (integer) or np.random.RandomState or Generator
-            instance to set the initial state of the random number
-            generator for reproducibility. If None, a randomly
-            initialized RandomState is used.
-
-        Returns
-        -------
-        x : array_like(float)
-            An n x ts_length array, where the t-th column is :math:`x_t`
-        y : array_like(float)
-            A k x ts_length array, where the t-th column is :math:`y_t`
-
-        """
-        # random_state = check_random_state(random_state)
-        #
-        # x0 = random_state.multivariate_normal(self.mu_0.flatten(),
-        #                                       self.Sigma_0)
-        # w = random_state.standard_normal((self.m, ts_length-1))
-        # v = self.C @ w  # Multiply each w_t by C to get v_t = C w_t
-        # # == simulate time series == #
-        # x = simulate_linear_model(self.A, x0, v, ts_length)
-        #
-        # if self.H is not None:
-        #     v = random_state.standard_normal((self.l, ts_length))
-        #     y = self.G @ x + self.H @ v
-        # else:
-        #     y = self.G @ x
-        x = super().simulate(ts_length=ts_length, random_state=random_state)[1]
-        y = super().simulate(ts_length=ts_length, random_state=random_state)[2]
-
-        return x, y
 
     def replicate(self, T=10, num_reps=100, random_state=None):
         r"""
