@@ -138,23 +138,29 @@ def test_raises_value_error_nonpositive_max_iter():
 class Test_multivariate_fixed_point():
 
     def func_t(self, x):
-        # PASS [2.70150056 2.59103714] 0 0 guess
-        # x[0] is variable 1
-        # x[1] is variable 2
+        # resembles the multivariate function f(x1,y1) = (10 - x^2, 57 - 3 * x * y^2)
+        # x[0] = x and x[1] = y
+        # fixed points are 2.7015 and 2.59104
         x1 = (10 - x[0] ** 2)
-        x2 = 57 - 3 * x[0] * x[1] ** 2
-        return np.array([x1, x2])
+        y1 = 57 - 3 * x[0] * x[1] ** 2
+        return np.array([x1, y1])
 
     def func_z(self, x):
+        # resembles the multivariate function f(x1,y1) = ((10 - x^2)/y, 57 - 3 * x * y^2)
+        # x[0] = x and x[1] = y
+        # fixed points are 1.99999 and 2.99998
         x1 = (10 - x[0] ** 2) / x[1]
-        x2 = 57 - 3 * x[0] * x[1] ** 2
+        y1 = 57 - 3 * x[0] * x[1] ** 2
 
-        return np.array([x1, x2])
+        return np.array([x1, y1])
 
     def func_d(self, x):
+        # resembles the multivariate function f(x1,y1) = (x^2 - y^2, 2x + y)
+        # x[0] = x and x[1] = y
+        # fixed points are 0 and 0
         x1 = x[0] ** 2 - x[1] ** 2
-        x2 = 2 * x[0] + x[1]
-        return np.array([x1, x2])
+        y1 = 2 * x[0] + x[1]
+        return np.array([x1, y1])
 
 
     def test_multivariate_fixed_point_func_t(self):
