@@ -135,7 +135,7 @@ class TestLQMarkov:
         self.lq_markov_mat1 = LQMarkov(Π, Qs, Rs, As, Bs,
                                        Cs=Cs, Ns=Ns, beta=0.95)
         self.lq_markov_mat2 = LQMarkov(Π, Qs, Rs, As, Bs,
-                                       Cs=Cs, Ns=Ns, beta=1.05)
+                                       Cs=Cs, Ns=Ns, beta=1.00)
 
     def teardown_method(self):
         del self.lq_markov_scalar
