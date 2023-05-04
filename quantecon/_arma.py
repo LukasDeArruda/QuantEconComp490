@@ -7,7 +7,6 @@ TODO: 1. Fix warnings concerning casting complex variables back to floats
 import numpy as np
 
 from ._time_series_model import TimeSeriesModel
-from .util import check_random_state
 
 
 class ARMA(TimeSeriesModel):
@@ -229,28 +228,3 @@ class ARMA(TimeSeriesModel):
         # num_autocov should be <= len(acov) / 2
         return acov[:num_autocov]
 
-    def simulation(self, ts_length=90, random_state=None):
-        """
-        Compute a simulated sample path assuming Gaussian shocks.
-
-        Parameters
-        ----------
-        ts_length : scalar(int), optional(default=90)
-            Number of periods to simulate for
-
-        random_state : int or np.random.RandomState/Generator, optional
-            Random seed (integer) or np.random.RandomState or Generator
-            instance to set the initial state of the random number
-            generator for reproducibility. If None, a randomly
-            initialized RandomState is used.
-
-        Returns
-        -------
-        vals : array_like(float)
-            A simulation of the model that corresponds to this class
-
-        """
-
-        vals = super().simulate(ts_length=ts_length, random_state=random_state)[0]
-
-        return vals.flatten()

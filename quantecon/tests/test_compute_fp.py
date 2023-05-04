@@ -133,3 +133,65 @@ def test_raises_value_error_nonpositive_max_iter():
     init = 1.
     max_iter = 0
     assert_raises(ValueError, compute_fixed_point, f, init, max_iter=max_iter)
+
+
+class Test_multivariate_fixed_point():
+
+    def func_t(self, x):
+        # resembles the multivariate function f(x1,y1) = (10 - x^2, 57 - 3 * x * y^2)
+        # x[0] = x and x[1] = y
+        # fixed points are 2.7015 and 2.59104
+        x1 = (10 - x[0] ** 2)
+        y1 = 57 - 3 * x[0] * x[1] ** 2
+        return np.array([x1, y1])
+
+    def func_z(self, x):
+        # resembles the multivariate function f(x1,y1) = ((10 - x^2)/y, 57 - 3 * x * y^2)
+        # x[0] = x and x[1] = y
+        # fixed points are 1.99999 and 2.99998
+        x1 = (10 - x[0] ** 2) / x[1]
+        y1 = 57 - 3 * x[0] * x[1] ** 2
+
+        return np.array([x1, y1])
+
+    def func_d(self, x):
+        # resembles the multivariate function f(x1,y1) = (x^2 - y^2, 2x + y)
+        # x[0] = x and x[1] = y
+        # fixed points are 0 and 0
+        x1 = x[0] ** 2 - x[1] ** 2
+        y1 = 2 * x[0] + x[1]
+        return np.array([x1, y1])
+
+
+    def test_multivariate_fixed_point_func_t(self):
+        """This function tests func_t. The solution to the multivariate system is (2.7015, 2.59104)
+         Answer is confirmed by the sciPY fixed_point function"""
+
+        x_guess = np.array([0, 0])
+
+        # Test the fixed point for variable 1
+        assert round(compute_fixed_point(self.func_t, x_guess, method='imitation_game')[0], 5) == 2.7015
+
+        # Test the fixed point for variable 2
+        assert round(compute_fixed_point(self.func_t, x_guess, method='imitation_game')[1], 5) == 2.59104
+
+    def test_multivariate_fixed_point_func_z(self):
+        """This function tests func_t. The solution to the multivariate system is (2.7015, 2.59104)
+            Answer is confirmed by University of Alberta and sciPY
+
+            https://www.youtube.com/watch?v=OTeyKGrk2ig&t=192s"""
+
+        x_guess = np.array([1.5, 3.5])
+
+        assert round(compute_fixed_point(self.func_z, x_guess, method='imitation_game')[0], 5) == 1.99999
+
+        assert round(compute_fixed_point(self.func_z, x_guess, method='imitation_game')[1], 5) == 2.99998
+
+    def test_multivariate_fixed_point_func_d(self):
+        """This function tests func_d. Test passes variables converge at 0"""
+
+        x_guess = np.array([0, 0])
+
+        assert round(compute_fixed_point(self.func_d, x_guess, method='imitation_game')[0], 5) == 0
+
+        assert round(compute_fixed_point(self.func_d, x_guess, method='imitation_game')[1], 5) == 0
